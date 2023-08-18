@@ -8,3 +8,5 @@
 ./test_inputs
 debug
 workflows
+venv
+.idea
