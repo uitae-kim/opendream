@@ -8,6 +8,7 @@ import os
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 import importlib.util
 import torch
+import os
 
 from PIL import Image
 from controlnet_aux import CannyDetector, OpenposeDetector
@@ -15,7 +16,10 @@ from controlnet_aux import CannyDetector, OpenposeDetector
 from .layer import Layer, ImageLayer, MaskLayer
 
 def dream(prompt: str, model_ckpt: str = "runwayml/stable-diffusion-v1-5", seed: int = 42, device: str = "mps", batch_size: int = 1, selected: int = 0, num_steps: int = 20, guidance_scale: float = 7.5, **kwargs):
-    pipe = StableDiffusionPipeline.from_pretrained(model_ckpt, torch_dtype=torch.float32, safety_checker=None)
+    if os.path.isfile(model_ckpt):
+        pipe = StableDiffusionPipeline.from_single_file(model_ckpt, torch_dtype=torch.float32, use_safetensors=True, load_safety_checker=False)
+    else:
+        pipe = StableDiffusionPipeline.from_pretrained(model_ckpt, torch_dtype=torch.float32, safety_checker=None)
     pipe = pipe.to(device)
     
     generator = [torch.Generator().manual_seed(seed + i) for i in range(batch_size)]
